@@ -49,10 +49,17 @@ async def notebook_client() -> AsyncIterator[NbModelClient]:
 
 
 @mcp.tool()
-async def add_cell(text: str) -> str:
+async def add_markdown_cell(markdown_text: str) -> str:
+    """Add a markdown cell to the jupyter notebook.
+
+    Args:
+        markdown_text: Markdown text to add to the cell.
+
+    Returns:
+        A message indicating that the cell was added successfully.
+    """
     async with notebook_client() as client:
-        client.add_markdown_cell(text)
-        client.execute_cell(client.cells[-1].id)
+        client.add_markdown_cell(markdown_text)
 
     return "Cell added successfully"
 
