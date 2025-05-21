@@ -64,5 +64,32 @@ async def add_markdown_cell(markdown_text: str) -> str:
     return "Cell added successfully"
 
 
+@mcp.tool()
+async def add_code_cell_and_execute(code: str) -> str:
+    """Add a code cell to the jupyter notebook.
+
+    Args:
+        code: Code to add to the cell.
+
+    Returns:
+        A message indicating that the cell was added successfully.
+    """
+
+    async with notebook_client() as client:
+        cell_index = client.add_code_cell(code)
+        execution_result = client.execute_cell(cell_index, kernel)
+        outputs = execution_result.get("outputs", [])
+
+        output_texts = []
+        for output in outputs:
+            output_type = output.get("output_type", "")
+            if output_type == "display_data":
+                data = output.get("data", {})
+                if "text/plain" in data:
+                    output_texts.append(data["text/plain"])
+
+    return "\n".join(output_texts)
+
+
 if __name__ == "__main__":
     mcp.run()
