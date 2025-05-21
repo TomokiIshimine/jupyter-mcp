@@ -64,10 +64,5 @@ async def add_markdown_cell(markdown_text: str) -> str:
     return "Cell added successfully"
 
 
-@mcp.tool()
-async def test(text: str) -> str:
-    return f"Hello, {text}!"
-
-
 if __name__ == "__main__":
     mcp.run()
