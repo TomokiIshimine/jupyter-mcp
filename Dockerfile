@@ -25,4 +25,4 @@ CMD ["/bin/bash"]
 
 # 本番用ステージ
 FROM base AS prod
-CMD ["python", "src/server.py"] 
+CMD ["python", "server.py"] 
