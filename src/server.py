@@ -66,7 +66,7 @@ async def add_markdown_cell(markdown_text: str) -> str:
 
 @mcp.tool()
 async def add_code_cell_and_execute(code: str) -> str:
-    """Add a code cell to the jupyter notebook.
+    """Add a code cell to the jupyter notebook and execute it.
 
     Args:
         code: Code to add to the cell.
