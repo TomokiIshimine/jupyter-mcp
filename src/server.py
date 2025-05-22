@@ -106,7 +106,7 @@ async def add_code_cell_and_execute(code: str) -> str:
                     + output.get("traceback", "")
                 )
 
-    return "\n".join(output_texts)
+    return output_texts
 
 
 if __name__ == "__main__":
