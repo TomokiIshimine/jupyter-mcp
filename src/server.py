@@ -83,10 +83,26 @@ async def add_code_cell_and_execute(code: str) -> str:
         output_texts = []
         for output in outputs:
             output_type = output.get("output_type", "")
-            if output_type == "display_data":
+            if output_type == "display_data" or output_type == "execute_result":
                 data = output.get("data", {})
                 if "text/plain" in data:
                     output_texts.append(data["text/plain"])
+                if "image/png" in data:
+                    output_texts.append("image/png")
+                if "text/html" in data:
+                    output_texts.append(data["text/plain"])
+            elif output_type == "stream":
+                output_texts.append(
+                    output.get("name", "") + ": " + output.get("text", "")
+                )
+            elif output_type == "error":
+                output_texts.append(
+                    output.get("ename", "")
+                    + ": "
+                    + output.get("evalue", "")
+                    + "\n"
+                    + output.get("traceback", "")
+                )
 
     return "\n".join(output_texts)
 
