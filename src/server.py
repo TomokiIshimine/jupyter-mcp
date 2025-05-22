@@ -30,7 +30,17 @@ class AppConfig:
 
 config = AppConfig()
 
-mcp = FastMCP("jupyter-mcp-server")
+mcp = FastMCP(
+    "jupyter-notebook-mcp-server",
+    instructions="""
+    This tool integrates Jupyter notebooks with the Model Context Protocol (MCP) system.
+    It allows users to execute code cells in Jupyter notebooks and visualize the outputs,
+    including text, HTML, and images. The server handles communication between the Jupyter
+    kernel and the MCP client, enabling interactive data analysis and visualization through
+    a consistent interface. Users can run Python code, view the results, and interact with
+    generated visualizations seamlessly.
+    """,
+)
 
 kernel = KernelClient(server_url=config.server_url, token=config.token)
 kernel.start()
