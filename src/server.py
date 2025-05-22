@@ -17,7 +17,7 @@ class AppConfig:
     """Application configuration."""
 
     notebook_path: str = os.getenv("NOTEBOOK_PATH", "notebook.ipynb")
-    server_url: str = os.getenv("SERVER_URL", "http://localhost:8888")
+    server_url: str = os.getenv("SERVER_URL", "http://host.docker.internal:8888")
     token: str = os.getenv("TOKEN", "MY_TOKEN")
     mcp_image_dir: Path = Path(os.getenv("MCP_IMAGE_DIR", "mcp_images"))
 
