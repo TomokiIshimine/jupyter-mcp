@@ -131,7 +131,22 @@ async def get_all_cells() -> list[str]:
     """Get all cells from the jupyter notebook."""
     async with notebook_client() as client:
         dict_data = client.as_dict()
-        return dict_data
+        cells = dict_data.get("cells", [])
+
+        processed_cells = []
+        for cell in cells:
+            processed_cell = {
+                "source": cell.get("source", ""),
+                "cell_type": cell.get("cell_type", ""),
+                "outputs": [],
+            }
+
+            for output in cell.get("outputs", []):
+                processed_cell["outputs"].append(_extract_text_from_output(output))
+
+            processed_cells.append(processed_cell)
+
+        return processed_cells
 
 
 if __name__ == "__main__":
