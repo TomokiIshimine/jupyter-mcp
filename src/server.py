@@ -126,5 +126,13 @@ async def add_code_cell_and_execute(code: str) -> str:
     return output_texts
 
 
+@mcp.tool()
+async def get_all_cells() -> list[str]:
+    """Get all cells from the jupyter notebook."""
+    async with notebook_client() as client:
+        dict_data = client.as_dict()
+        return dict_data
+
+
 if __name__ == "__main__":
     mcp.run()
