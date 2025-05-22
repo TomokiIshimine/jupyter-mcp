@@ -77,7 +77,9 @@ async def add_code_cell_and_execute(code: str) -> str:
 
     async with notebook_client() as client:
         cell_index = client.add_code_cell(code)
-        execution_result = client.execute_cell(cell_index, kernel)
+        execution_result = client.execute_cell(
+            cell_index, kernel, timeout=config.timeout
+        )
         outputs = execution_result.get("outputs", [])
 
         output_texts = []
