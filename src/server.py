@@ -74,13 +74,7 @@ def _extract_text_from_output(output: dict) -> str:
     elif output_type == "stream":
         return output.get("name", "") + ": " + output.get("text", "")
     elif output_type == "error":
-        return (
-            output.get("ename", "")
-            + ": "
-            + output.get("evalue", "")
-            + "\n"
-            + output.get("traceback", "")
-        )
+        return output.get("ename", "") + ": " + output.get("evalue", "")
     return ""
 
 
