@@ -38,12 +38,14 @@ kernel.start()
 
 def _png_to_image_obj(b64_png: str) -> Image:
     """
-    base64-encoded PNG をファイルに保存し、FastMCP の Image オブジェクトで返す
+    Save a base64-encoded PNG to a file and return it as a FastMCP Image object.
     """
     fname = config.mcp_image_dir / f"{uuid.uuid4().hex}.png"
     with open(fname, "wb") as f:
         f.write(base64.b64decode(b64_png))
-    return Image(path=str(fname))  # Claude Desktop や MCP Inspector が自動表示
+    return Image(
+        path=str(fname)
+    )  # Automatically displayed by Claude Desktop and MCP Inspector
 
 
 def _extract_text_from_output(output: dict) -> str:
@@ -89,7 +91,7 @@ async def notebook_client() -> AsyncIterator[NbModelClient]:
 
 @mcp.tool()
 async def add_markdown_cell(markdown_text: str) -> str:
-    """Add a markdown cell to the jupyter notebook.
+    """Add a markdown cell to the Jupyter Notebook.
 
     Args:
         markdown_text: Markdown text to add to the cell.
@@ -104,14 +106,14 @@ async def add_markdown_cell(markdown_text: str) -> str:
 
 
 @mcp.tool()
-async def add_code_cell_and_execute(code: str) -> str:
-    """Add a code cell to the jupyter notebook and execute it.
+async def add_code_cell_and_execute(code: str) -> list[str]:
+    """Add a code cell to the Jupyter Notebook and execute it.
 
     Args:
         code: Code to add to the cell.
 
     Returns:
-        A message indicating that the cell was added successfully.
+        A list of strings representing the output from the executed cell.
     """
 
     async with notebook_client() as client:
@@ -128,7 +130,7 @@ async def add_code_cell_and_execute(code: str) -> str:
 
 @mcp.tool()
 async def get_all_cells() -> list[str]:
-    """Get all cells from the jupyter notebook."""
+    """Get all cells from the Jupyter Notebook."""
     async with notebook_client() as client:
         dict_data = client.as_dict()
         cells = dict_data.get("cells", [])
