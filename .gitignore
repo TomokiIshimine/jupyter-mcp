@@ -3,3 +3,13 @@ __pycache__/*
 .pytest_cache/*
 
 test_images/*
+
+*.ipynb
+
+*.pyc
+
+*.pyo
+
+*.pyd
+
+*.pyw
