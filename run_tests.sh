@@ -6,6 +6,9 @@ set -e
 echo "=== Jupyter MCP Server テストランナー ==="
 echo
 
+# PYTHONPATHにsrcディレクトリを追加
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
+
 # .envファイルが存在する場合は読み込み
 if [ -f .env ]; then
     echo ".envファイルから環境変数を読み込み中..."
