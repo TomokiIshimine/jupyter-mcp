@@ -5,3 +5,6 @@ aiofiles
 aiohttp
 websockets
 mcp
+pytest
+pytest-asyncio
+python-dotenv

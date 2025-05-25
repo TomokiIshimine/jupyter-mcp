@@ -14,6 +14,8 @@ FROM base AS dev
 
 RUN apt-get update && apt-get install -y \
     git \
+    make \
+    curl \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
