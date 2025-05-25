@@ -1,15 +1,65 @@
-__pycache__/*
+# Python関連
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-.pytest_cache/*
+# テスト関連
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
 
-test_images/*
-
+# Jupyter関連
+.ipynb_checkpoints/
 *.ipynb
 
-*.pyc
+# プロジェクト固有
+test_images/
+test_output/
+mcp_images/
 
-*.pyo
+# 環境設定
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-*.pyd
+# IDE設定
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
 
-*.pyw
+# OS関連
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ログファイル
+*.log

@@ -1,3 +1,6 @@
+# Jupyter MCP Server 依存関係
+
+# コア依存関係
 jupyter-ydoc
 nbclient
 nbformat
@@ -5,6 +8,11 @@ aiofiles
 aiohttp
 websockets
 mcp
+
+# テスト依存関係
 pytest
 pytest-asyncio
+numpy
+
+# 設定管理
 python-dotenv

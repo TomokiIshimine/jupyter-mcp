@@ -1,38 +1,38 @@
-.PHONY: test test-basic test-deletion test-pytest install clean help
+.PHONY: test test-basic test-deletion test-pytest install clean help jupyter
 
-# Default target
+# デフォルトターゲット
 help:
-	@echo "Jupyter MCP Server - Available commands:"
-	@echo "  make install      - Install dependencies"
-	@echo "  make test         - Run all tests"
-	@echo "  make test-basic   - Run basic functionality test"
-	@echo "  make test-deletion - Run deletion sync test"
-	@echo "  make test-pytest  - Run tests with pytest"
-	@echo "  make clean        - Clean test outputs and cache"
-	@echo "  make jupyter      - Start Jupyter server (for testing)"
+	@echo "Jupyter MCP Server - 利用可能なコマンド:"
+	@echo "  make install      - 依存関係をインストール"
+	@echo "  make test         - すべてのテストを実行"
+	@echo "  make test-basic   - 基本機能テストを実行"
+	@echo "  make test-deletion - 削除同期テストを実行"
+	@echo "  make test-pytest  - pytestでテストを実行"
+	@echo "  make clean        - テスト出力とキャッシュをクリーンアップ"
+	@echo "  make jupyter      - Jupyterサーバーを開始（テスト用）"
 
-# Install dependencies
+# 依存関係をインストール
 install:
 	pip install -r requirements.txt
 	pip install pytest pytest-asyncio
 
-# Run all tests
+# すべてのテストを実行
 test:
 	./run_tests.sh
 
-# Run basic functionality test
+# 基本機能テストを実行
 test-basic:
 	./run_tests.sh basic
 
-# Run deletion sync test
+# 削除同期テストを実行
 test-deletion:
 	./run_tests.sh deletion
 
-# Run tests with pytest
+# pytestでテストを実行
 test-pytest:
 	./run_tests.sh pytest
 
-# Clean test outputs and cache
+# テスト出力とキャッシュをクリーンアップ
 clean:
 	rm -rf test_output/
 	rm -rf test_images/
@@ -43,9 +43,9 @@ clean:
 	find . -name "*.pyc" -delete
 	find . -name ".DS_Store" -delete
 
-# Start Jupyter server for testing
+# テスト用Jupyterサーバーを開始
 jupyter:
-	@echo "Starting Jupyter server..."
-	@echo "Server URL: http://localhost:8888"
-	@echo "Token: my-token"
+	@echo "Jupyterサーバーを開始中..."
+	@echo "サーバーURL: http://localhost:8888"
+	@echo "トークン: my-token"
 	jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' 

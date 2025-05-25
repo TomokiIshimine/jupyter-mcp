@@ -1,13 +1,13 @@
 # Jupyter MCP Server
 
-A Model Context Protocol (MCP) server that integrates with Jupyter notebooks, allowing execution of code cells and management of notebook content through MCP tools.
+A Model Context Protocol (MCP) server integrated with Jupyter notebooks, enabling code cell execution and notebook content management through MCP tools.
 
 ## Features
 
 - Execute code cells in Jupyter notebooks
 - Add and manage markdown and code cells
-- View cell outputs including text, images, and HTML
-- Collaborative editing support via jupyter-ydoc
+- Display cell outputs including text, images, and HTML
+- Collaborative editing support with jupyter-ydoc
 - Automatic session and kernel management
 
 ## Project Structure
@@ -24,10 +24,24 @@ jupyter-mcp/
 │   ├── tools.py             # MCP tool definitions
 │   └── utils.py             # Utility functions
 ├── tests/
-│   └── ...                  # Test files
+│   ├── __init__.py          # Test package initialization
+│   ├── conftest.py          # pytest configuration
+│   ├── test_jupyter_mcp.py  # Basic functionality tests
+│   └── test_deletion_sync.py # Cell deletion sync tests
+├── .devcontainer/           # Development container configuration
+├── .vscode/                 # VSCode settings
+├── test_images/             # Test image output directory
+├── test_output/             # Test output directory
 ├── requirements.txt         # Python dependencies
 ├── Dockerfile              # Docker configuration
-└── README.md               # This file
+├── Makefile                # Build and test commands
+├── run_tests.sh            # Test execution script
+├── env.example             # Environment variable example
+├── .gitignore              # Git ignore settings
+├── README.md               # This file (English)
+├── README_ja.md            # Japanese README
+├── CONTRIBUTING.md         # Contributing guidelines (English)
+└── CONTRIBUTING_ja.md      # Contributing guidelines (Japanese)
 ```
 
 ## Installation
@@ -40,6 +54,8 @@ cd jupyter-mcp
 
 2. Install dependencies:
 ```bash
+make install
+# or
 pip install -r requirements.txt
 ```
 
@@ -50,10 +66,18 @@ The server is configured through environment variables:
 - `NOTEBOOK_PATH`: Path to the notebook file (default: "notebook.ipynb")
 - `SERVER_URL`: Jupyter server URL (default: "http://localhost:8888")
 - `TOKEN`: Jupyter server authentication token (required)
-- `KERNEL_NAME`: Specific kernel to use (optional, defaults to server's default)
-- `MCP_IMAGE_DIR`: Directory to store extracted images (default: "mcp_images")
+- `KERNEL_NAME`: Specific kernel to use (optional, uses server default)
+- `MCP_IMAGE_DIR`: Directory to save extracted images (default: "mcp_images")
 - `TIMEOUT`: General operation timeout in seconds (default: 180)
 - `STARTUP_TIMEOUT`: Startup timeout in seconds (default: 60)
+
+### Setting Environment Variables
+
+Copy `env.example` to `.env` and adjust as needed:
+
+```bash
+cp env.example .env
+```
 
 ## Usage
 
@@ -68,7 +92,7 @@ export SERVER_URL="http://localhost:8888"
 python -m src.server
 ```
 
-### Using with Docker
+### Using Docker
 
 Build and run the Docker container:
 
@@ -80,33 +104,39 @@ docker run -e TOKEN="your-token" -p 8080:8080 jupyter-mcp
 ### Available MCP Tools
 
 1. **add_markdown_cell**: Add a markdown cell to the notebook
-2. **add_code_cell_and_execute**: Add a code cell and execute it
+2. **add_code_cell_and_execute**: Add and execute a code cell
 3. **execute_cell**: Execute an existing cell by index
 4. **get_all_cells**: Retrieve all cells from the notebook
 5. **update_cell**: Update the content of a specific cell
 6. **delete_cell**: Delete a cell by index
-7. **clear_all_outputs**: Clear all outputs from code cells
+7. **clear_all_outputs**: Clear outputs from all code cells
 
 ## Development
 
 ### Running Tests
 
 ```bash
-pytest
+# Run all tests
+make test
+
+# Run specific tests
+make test-basic      # Basic functionality tests
+make test-deletion   # Deletion sync tests
+make test-pytest     # Run tests with pytest
 ```
 
 ### Code Structure
 
-- **NotebookManager**: Handles all notebook operations including:
+- **NotebookManager**: Handles all notebook operations:
   - Loading and saving notebooks from/to Jupyter server
-  - Managing YDoc for collaborative editing
-  - Executing cells via kernel WebSocket connections
-  - Managing kernel sessions
+  - YDoc management for collaborative editing
+  - Cell execution through kernel WebSocket connections
+  - Kernel session management
 
 - **MCP Tools**: Each tool is decorated with `@mcp.tool()` and handles:
   - Input validation
   - Calling appropriate NotebookManager methods
-  - Formatting outputs for MCP responses
+  - Formatting output for MCP responses
 
 - **Utils**: Helper functions for:
   - Cleaning notebook data for nbformat compatibility
@@ -126,13 +156,15 @@ The server includes custom exception classes for better error handling:
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
+3. Implement your changes
+4. Add tests for new features
 5. Submit a pull request
+
+For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[Your License Here]
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Testing
 
@@ -142,10 +174,10 @@ The project includes comprehensive tests for all functionality. Tests are organi
 
 ```
 tests/
-├── __init__.py
+├── __init__.py              # Test package initialization
 ├── conftest.py              # pytest configuration
 ├── test_jupyter_mcp.py      # Basic functionality tests
-└── test_deletion_sync.py    # Cell deletion synchronization tests
+└── test_deletion_sync.py    # Cell deletion sync tests
 ```
 
 ### Running Tests
@@ -160,24 +192,24 @@ make install
 make test
 
 # Run specific tests
-make test-basic      # Run basic functionality test
-make test-deletion   # Run deletion sync test
-make test-pytest     # Run tests with pytest
+make test-basic      # Basic functionality tests
+make test-deletion   # Deletion sync tests
+make test-pytest     # Run with pytest
 ```
 
-#### Using the test runner script
+#### Using Test Runner Script
 
 ```bash
 # Run all tests
 ./run_tests.sh
 
 # Run specific tests
-./run_tests.sh basic      # Basic functionality test
-./run_tests.sh deletion   # Deletion sync test
+./run_tests.sh basic      # Basic functionality tests
+./run_tests.sh deletion   # Deletion sync tests
 ./run_tests.sh pytest     # Run with pytest
 ```
 
-#### Direct execution
+#### Direct Execution
 
 ```bash
 # Run individual test files
@@ -190,7 +222,7 @@ pytest tests/ -v -s
 
 ### Test Environment
 
-Tests require a running Jupyter server. You can start one using:
+Tests require a running Jupyter server. You can start one with:
 
 ```bash
 make jupyter
@@ -216,10 +248,15 @@ Default test environment variables:
 - `NOTEBOOK_PATH`: test.ipynb
 - `MCP_IMAGE_DIR`: test_images
 
-### Cleaning Up
+### Cleanup
 
 Remove test outputs and cache:
 
 ```bash
 make clean
-``` 
+```
+
+## Language Support
+
+- [English](README.md) (this file)
+- [日本語](README_ja.md) (Japanese) 
