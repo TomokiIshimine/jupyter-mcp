@@ -12,7 +12,6 @@ import nbformat
 import websockets
 from jupyter_ydoc import YNotebook
 from mcp.server.fastmcp import FastMCP, Image
-from nbclient import NotebookClient
 
 
 @dataclass
@@ -42,8 +41,8 @@ mcp = FastMCP(
     instructions="""
     This tool integrates Jupyter notebooks with the Model Context Protocol (MCP) system.
     It allows users to execute code cells in Jupyter notebooks and visualize the outputs,
-    including text, HTML, and images. The server uses jupyter-ydoc for collaborative editing,
-    nbclient for kernel management, and nbformat for notebook structure handling.
+    including text, HTML, and images. The server uses jupyter-ydoc for collaborative editing
+    and nbformat for notebook structure handling.
     Users can run Python code, view the results, and interact with generated visualizations seamlessly.
     """,
 )
@@ -68,14 +67,13 @@ def clean_notebook_for_nbformat(notebook_dict: Dict[str, Any]) -> Dict[str, Any]
 
 
 class NotebookManager:
-    """Manages notebook operations using YDoc, nbclient, and nbformat."""
+    """Manages notebook operations using YDoc and nbformat."""
 
     def __init__(self, notebook_path: str, server_url: str, token: str):
         self.notebook_path = notebook_path
         self.server_url = server_url
         self.token = token
         self.ydoc: Optional[YNotebook] = None
-        self.nb_client: Optional[NotebookClient] = None
         self._lock = asyncio.Lock()
         self.ws_connection = None
 
@@ -125,14 +123,6 @@ class NotebookManager:
             # YDoc expects a notebook dict
             self.ydoc.set(self.notebook)
 
-            # Initialize notebook client with server connection
-            self.nb_client = NotebookClient(
-                self.notebook,
-                kernel_name=config.kernel_name,
-                timeout=config.timeout,
-                startup_timeout=config.startup_timeout,
-            )
-
     async def save_notebook_to_server(self):
         """Save the notebook to Jupyter server."""
         import aiohttp
@@ -170,6 +160,27 @@ class NotebookManager:
         if self.ydoc:
             # YDoc expects a notebook dict
             self.ydoc.set(self.notebook)
+
+    async def refresh_from_server(self):
+        """Refresh notebook content from Jupyter server."""
+        import aiohttp
+
+        async with aiohttp.ClientSession() as session:
+            notebook_url = f"{self.server_url}/api/contents/{self.notebook_path}"
+            headers = {"Authorization": f"token {self.token}"}
+
+            async with session.get(notebook_url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    notebook_content = data.get("content", {})
+                    # Clean the notebook content before using nbformat
+                    cleaned_content = clean_notebook_for_nbformat(notebook_content)
+                    self.notebook = nbformat.from_dict(cleaned_content)
+                    # Update YDoc with the latest content
+                    if self.ydoc:
+                        self.ydoc.set(self.notebook)
+                else:
+                    raise Exception(f"Failed to refresh notebook: {resp.status}")
 
     async def execute_on_server(self, cell_index: int) -> Dict[str, Any]:
         """Execute a cell on the Jupyter server."""
@@ -354,7 +365,7 @@ async def add_markdown_cell(markdown_text: str) -> str:
         A message indicating that the cell was added successfully.
     """
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         # Create new markdown cell
         new_cell = nbformat.v4.new_markdown_cell(source=markdown_text)
@@ -377,7 +388,7 @@ async def add_code_cell_and_execute(code: str) -> List[Any]:
         A list of outputs from the executed cell.
     """
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         # Create new code cell
         new_cell = nbformat.v4.new_code_cell(source=code)
@@ -451,7 +462,7 @@ async def execute_cell(cell_index: int) -> List[Any]:
         A list of outputs from the executed cell.
     """
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         if cell_index >= len(notebook_manager.notebook.cells):
             return [f"Error: Cell index {cell_index} out of range"]
@@ -520,7 +531,7 @@ async def execute_cell(cell_index: int) -> List[Any]:
 async def get_all_cells() -> List[Dict[str, Any]]:
     """Get all cells from the Jupyter Notebook."""
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         cells = []
         for idx, cell in enumerate(notebook_manager.notebook.cells):
@@ -554,7 +565,7 @@ async def update_cell(cell_index: int, new_content: str) -> str:
         A message indicating success or failure.
     """
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         if cell_index >= len(notebook_manager.notebook.cells):
             return f"Error: Cell index {cell_index} out of range"
@@ -578,7 +589,7 @@ async def delete_cell(cell_index: int) -> str:
         A message indicating success or failure.
     """
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         if cell_index >= len(notebook_manager.notebook.cells):
             return f"Error: Cell index {cell_index} out of range"
@@ -595,7 +606,7 @@ async def delete_cell(cell_index: int) -> str:
 async def clear_all_outputs() -> str:
     """Clear all outputs from all code cells in the notebook."""
     async with notebook_manager._lock:
-        await notebook_manager.sync_from_ydoc()
+        await notebook_manager.refresh_from_server()
 
         for cell in notebook_manager.notebook.cells:
             if cell.cell_type == "code":
