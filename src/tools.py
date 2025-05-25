@@ -3,9 +3,9 @@ from typing import Any, Dict, List
 import nbformat
 from mcp.server.fastmcp import FastMCP
 
-from .config import config
-from .notebook_manager import NotebookManager
-from .utils import convert_output_dict_to_nbformat, extract_output_from_cell
+from config import config
+from notebook_manager import NotebookManager
+from utils import convert_output_dict_to_nbformat, extract_output_from_cell
 
 # MCP instance
 mcp = FastMCP(

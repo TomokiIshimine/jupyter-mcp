@@ -6,7 +6,7 @@ from typing import Any, Dict
 import nbformat
 from mcp.server.fastmcp import Image
 
-from .config import config
+from config import config
 
 
 def clean_notebook_for_nbformat(notebook_dict: Dict[str, Any]) -> Dict[str, Any]:

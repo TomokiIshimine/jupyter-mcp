@@ -1,6 +1,6 @@
 import asyncio
 
-from .tools import mcp, notebook_manager
+from tools import mcp, notebook_manager
 
 
 async def startup():

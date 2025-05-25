@@ -9,6 +9,9 @@ RUN python -m pip install --upgrade pip \
 
 COPY src/ .
 
+# Set PYTHONPATH to include the app directory
+ENV PYTHONPATH=/app
+
 # 開発用ステージ
 FROM base AS dev
 

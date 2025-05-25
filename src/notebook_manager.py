@@ -9,9 +9,9 @@ import nbformat
 import websockets
 from jupyter_ydoc import YNotebook
 
-from .config import config
-from .exceptions import KernelError, NotebookError, ServerConnectionError
-from .utils import clean_notebook_for_nbformat
+from config import config
+from exceptions import KernelError, NotebookError, ServerConnectionError
+from utils import clean_notebook_for_nbformat
 
 
 class NotebookManager:

@@ -1,4 +1,4 @@
-from .models import AppConfig
+from models import AppConfig
 
 # Global configuration instance
 config = AppConfig()
