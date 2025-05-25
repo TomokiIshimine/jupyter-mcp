@@ -35,15 +35,28 @@ Jupyter NotebookとModel Context Protocol (MCP)を統合するサーバーです
 ### `clear_all_outputs`
 すべてのコードセルの出力をクリアします。
 
+### `get_available_kernels`
+Jupyter Serverから利用可能なカーネルの一覧を取得します。現在使用中のカーネルと、環境変数で設定されたカーネルも表示します。
+
 ## 環境変数
 
 - `NOTEBOOK_PATH`: ノートブックファイルのパス（デフォルト: `notebook.ipynb`）
 - `SERVER_URL`: Jupyter ServerのURL（デフォルト: `http://localhost:8888`）**必須**
 - `TOKEN`: Jupyter Serverの認証トークン **必須**
-- `KERNEL_NAME`: 使用するJupyterカーネル名（デフォルト: `python3`）
+- `KERNEL_NAME`: 使用するJupyterカーネル名（オプション。設定されていない場合はサーバーから自動選択）
 - `MCP_IMAGE_DIR`: 画像を保存するディレクトリ（デフォルト: `mcp_images`）
 - `TIMEOUT`: セル実行のタイムアウト秒数（デフォルト: 180）
 - `STARTUP_TIMEOUT`: カーネル起動のタイムアウト秒数（デフォルト: 60）
+
+## カーネルの自動選択
+
+`KERNEL_NAME`環境変数が設定されていない場合、サーバーは以下の優先順位でカーネルを自動選択します：
+
+1. Jupyter Serverのデフォルトカーネル
+2. `python3`カーネル（利用可能な場合）
+3. 利用可能な最初のカーネル
+
+`get_available_kernels`ツールを使用して、利用可能なカーネルの一覧を確認できます。
 
 ## Jupyter Serverの起動
 

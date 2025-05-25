@@ -21,7 +21,7 @@ class AppConfig:
     notebook_path: str = os.getenv("NOTEBOOK_PATH", "notebook.ipynb")
     server_url: str = os.getenv("SERVER_URL", "http://localhost:8888")
     token: str = os.getenv("TOKEN", "")
-    kernel_name: str = os.getenv("KERNEL_NAME", "python3")
+    kernel_name: str = os.getenv("KERNEL_NAME", "")
     mcp_image_dir: Path = Path(os.getenv("MCP_IMAGE_DIR", "mcp_images"))
     timeout: int = int(os.getenv("TIMEOUT", 180))
     startup_timeout: int = int(os.getenv("STARTUP_TIMEOUT", 60))
@@ -76,6 +76,8 @@ class NotebookManager:
         self.ydoc: Optional[YNotebook] = None
         self._lock = asyncio.Lock()
         self.ws_connection = None
+        self.available_kernels = {}
+        self.default_kernel = None
 
     def _get_websocket_url(self) -> str:
         """Convert HTTP URL to WebSocket URL for YDoc connection."""
@@ -93,9 +95,56 @@ class NotebookManager:
         )
         return ws_url
 
+    async def get_available_kernels(self) -> Dict[str, Any]:
+        """Get available kernels from Jupyter server."""
+        import aiohttp
+
+        async with aiohttp.ClientSession() as session:
+            kernelspecs_url = f"{self.server_url}/api/kernelspecs"
+            headers = {"Authorization": f"token {self.token}"}
+
+            async with session.get(kernelspecs_url, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    self.available_kernels = data.get("kernelspecs", {})
+
+                    # Set default kernel if not already set
+                    if not self.default_kernel and self.available_kernels:
+                        # Try to use the default kernel from server
+                        default_name = data.get("default", None)
+                        if default_name and default_name in self.available_kernels:
+                            self.default_kernel = default_name
+                        # Otherwise, prefer python3 if available
+                        elif "python3" in self.available_kernels:
+                            self.default_kernel = "python3"
+                        # Otherwise, use the first available kernel
+                        else:
+                            self.default_kernel = next(
+                                iter(self.available_kernels.keys())
+                            )
+
+                    return self.available_kernels
+                else:
+                    raise Exception(f"Failed to get kernelspecs: {resp.status}")
+
+    async def get_kernel_name(self) -> str:
+        """Get the kernel name to use, preferring environment variable if set."""
+        # If kernel_name is set in environment, use it
+        if config.kernel_name:
+            return config.kernel_name
+
+        # Otherwise, use the default kernel from server
+        if not self.default_kernel:
+            await self.get_available_kernels()
+
+        return self.default_kernel or "python3"
+
     async def initialize(self):
         """Initialize the notebook manager."""
         async with self._lock:
+            # Get available kernels first
+            await self.get_available_kernels()
+
             # First, check if notebook exists on server
             import aiohttp
 
@@ -203,10 +252,13 @@ class NotebookManager:
 
             # Create new session if needed
             if not session_id:
+                # Get the kernel name to use
+                kernel_name = await self.get_kernel_name()
+
                 data = {
                     "path": self.notebook_path,
                     "type": "notebook",
-                    "kernel": {"name": config.kernel_name},
+                    "kernel": {"name": kernel_name},
                 }
                 async with session.post(
                     sessions_url, headers=headers, json=data
