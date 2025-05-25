@@ -1,3 +1,7 @@
-jupyter-kernel-client
-jupyter-nbmodel-client
+jupyter-ydoc
+nbclient
+nbformat
+aiofiles
+aiohttp
+websockets
 mcp
