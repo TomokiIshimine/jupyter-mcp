@@ -10,6 +10,64 @@ A Model Context Protocol (MCP) server integrated with Jupyter notebooks, enablin
 - Collaborative editing support with jupyter-ydoc
 - Automatic session and kernel management
 
+## Quick Start with Docker
+
+For a quick setup with JupyterLab environment, you can use the pre-configured Docker environment:
+
+### JupyterLab Docker Environment Setup
+
+1. **Clone the JupyterLab Docker repository:**
+   ```bash
+   git clone https://github.com/TomokiIshimine/jupyter-lab-docker.git
+   cd jupyter-lab-docker
+   ```
+
+2. **Start JupyterLab using Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access JupyterLab:**
+   - Open `http://localhost:8888` in your browser
+   - Use token: `my-token` when prompted
+
+### Claude Desktop Integration
+
+Configure `claude_desktop_config.json` to use this MCP server with the Docker JupyterLab environment:
+
+```json
+{
+  "mcpServers": {
+    "jupyter": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e", "SERVER_URL=http://host.docker.internal:8888",
+        "-e", "TOKEN=my-token",
+        "-e", "NOTEBOOK_PATH=test.ipynb",
+        "-e", "TIMEOUT=30",
+        "tonlab/jupyter-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+**Configuration Parameters:**
+- `SERVER_URL`: JupyterLab server URL (typically `http://host.docker.internal:8888`)
+- `TOKEN`: JupyterLab access token (default is `my-token`)
+- `NOTEBOOK_PATH`: Target Jupyter Notebook file name
+- `TIMEOUT`: Timeout duration (seconds)
+
+The Docker JupyterLab environment includes:
+- **Latest JupyterLab Version**: Uses `quay.io/jupyter/base-notebook:x86_64-lab-4.1.5`
+- **Collaborative Editing**: Pre-installed `jupyter-server-ydoc` and `jupyter-collaboration`
+- **Japanese Language Support**: Japanese fonts and matplotlib configuration
+- **Essential Python Libraries**: matplotlib, scikit-learn, pandas, numpy
+- **Data Persistence**: Host `./work` directory mounted to `/home/jovyan/work`
+
 ## Project Structure
 
 ```
@@ -81,7 +139,11 @@ cp env.example .env
 
 ## Usage
 
-### Running the Server
+### Option 1: Using with Docker JupyterLab Environment (Recommended)
+
+The easiest way to get started is using the pre-configured Docker JupyterLab environment. See the [Quick Start with Docker](#quick-start-with-docker) section above.
+
+### Option 2: Running the Server Standalone
 
 ```bash
 # Set required environment variables
@@ -92,7 +154,7 @@ export SERVER_URL="http://localhost:8888"
 python -m src.server
 ```
 
-### Using Docker
+### Option 3: Using Docker for MCP Server Only
 
 Build and run the Docker container:
 
@@ -222,13 +284,24 @@ pytest tests/ -v -s
 
 ### Test Environment
 
-Tests require a running Jupyter server. You can start one with:
+Tests require a running Jupyter server. You have several options:
+
+#### Option 1: Using Docker JupyterLab Environment (Recommended)
+
+```bash
+# Clone and start the Docker JupyterLab environment
+git clone https://github.com/TomokiIshimine/jupyter-lab-docker.git
+cd jupyter-lab-docker
+docker-compose up -d
+```
+
+#### Option 2: Using Make
 
 ```bash
 make jupyter
 ```
 
-Or manually:
+#### Option 3: Manual Setup
 
 ```bash
 jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token'

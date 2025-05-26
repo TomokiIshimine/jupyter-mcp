@@ -10,6 +10,64 @@ Jupyter notebookと統合されたModel Context Protocol (MCP) サーバーで�
 - jupyter-ydocによる協調編集サポート
 - 自動セッション・カーネル管理
 
+## Dockerを使用したクイックスタート
+
+JupyterLab環境を素早くセットアップするには、事前設定済みのDocker環境を使用できます：
+
+### JupyterLab Docker環境のセットアップ
+
+1. **JupyterLab Dockerリポジトリをクローン:**
+   ```bash
+   git clone https://github.com/TomokiIshimine/jupyter-lab-docker.git
+   cd jupyter-lab-docker
+   ```
+
+2. **Docker Composeを使用してJupyterLabを起動:**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **JupyterLabにアクセス:**
+   - ブラウザで `http://localhost:8888` を開く
+   - トークンを求められた場合は `my-token` を入力
+
+### Claude Desktopとの連携
+
+Docker JupyterLab環境でこのMCPサーバーを使用するために、`claude_desktop_config.json` を設定します：
+
+```json
+{
+  "mcpServers": {
+    "jupyter": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e", "SERVER_URL=http://host.docker.internal:8888",
+        "-e", "TOKEN=my-token",
+        "-e", "NOTEBOOK_PATH=test.ipynb",
+        "-e", "TIMEOUT=30",
+        "tonlab/jupyter-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+**設定パラメータ:**
+- `SERVER_URL`: JupyterLab サーバーURL（通常は `http://host.docker.internal:8888`）
+- `TOKEN`: JupyterLab アクセストークン（デフォルトは `my-token`）
+- `NOTEBOOK_PATH`: 対象のJupyter Notebookファイル名
+- `TIMEOUT`: タイムアウト時間（秒）
+
+Docker JupyterLab環境には以下が含まれます：
+- **最新のJupyterLabバージョン**: `quay.io/jupyter/base-notebook:x86_64-lab-4.1.5` を使用
+- **協調編集機能**: `jupyter-server-ydoc` と `jupyter-collaboration` がプリインストール
+- **日本語サポート**: 日本語フォントとmatplotlib設定
+- **主要なPythonライブラリ**: matplotlib、scikit-learn、pandas、numpy
+- **データ永続化**: ホストの `./work` ディレクトリが `/home/jovyan/work` にマウント
+
 ## プロジェクト構造
 
 ```
@@ -78,7 +136,11 @@ cp env.example .env
 
 ## 使用方法
 
-### サーバーの実行
+### オプション1: Docker JupyterLab環境を使用（推奨）
+
+最も簡単な開始方法は、事前設定済みのDocker JupyterLab環境を使用することです。上記の[Dockerを使用したクイックスタート](#dockerを使用したクイックスタート)セクションを参照してください。
+
+### オプション2: サーバーをスタンドアロンで実行
 
 ```bash
 # 必要な環境変数を設定
@@ -89,7 +151,7 @@ export SERVER_URL="http://localhost:8888"
 python -m src.server
 ```
 
-### Dockerを使用
+### オプション3: MCPサーバーのみDockerを使用
 
 Dockerコンテナをビルドして実行:
 
@@ -219,13 +281,24 @@ pytest tests/ -v -s
 
 ### テスト環境
 
-テストには実行中のJupyterサーバーが必要です。以下で開始できます：
+テストには実行中のJupyterサーバーが必要です。いくつかのオプションがあります：
+
+#### オプション1: Docker JupyterLab環境を使用（推奨）
+
+```bash
+# Docker JupyterLab環境をクローンして開始
+git clone https://github.com/TomokiIshimine/jupyter-lab-docker.git
+cd jupyter-lab-docker
+docker-compose up -d
+```
+
+#### オプション2: Makeを使用
 
 ```bash
 make jupyter
 ```
 
-または手動で：
+#### オプション3: 手動セットアップ
 
 ```bash
 jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token'
